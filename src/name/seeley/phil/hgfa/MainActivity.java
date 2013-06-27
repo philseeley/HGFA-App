@@ -20,6 +20,7 @@ import android.content.Intent;
 import android.util.Base64;
 import android.view.Menu;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 public class MainActivity extends Activity
@@ -89,7 +90,10 @@ public class MainActivity extends Activity
         StringBuffer data = new StringBuffer();
 
         TextView infoTextView = (TextView) findViewById(R.id.text_info);
+        ImageView imageView = (ImageView) findViewById(R.id.imageView);
+        
         infoTextView.setText("");
+        
         try
         {
           String line;
@@ -105,9 +109,9 @@ public class MainActivity extends Activity
               instance.initVerify(publicKey);
               instance.update(data.toString().getBytes());
               if (instance.verify(Base64.decode(value, Base64.DEFAULT)))
-                infoTextView.append("Valid");
+                imageView.setImageResource(R.drawable.valid);
               else
-                infoTextView.append("INVALID");
+                imageView.setImageResource(R.drawable.invalid);
             } else
             {
               data.append(line);

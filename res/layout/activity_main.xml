@@ -1,7 +1,9 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent"
+    android:clickable="true"
+    android:onClick="scan" >
 
     <TextView
         android:id="@+id/text_info"
@@ -9,17 +11,17 @@
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
-        android:text=""
+        android:clickable="false"
+        android:text="Tap to Scan"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:typeface="monospace" />
 
-    <Button
-        android:id="@+id/button_scan"
+    <ImageView
+        android:id="@+id/imageView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
-        android:text="Scan Card"
-        android:onClick="scan" />
+        android:src="@drawable/blank" />
 
 </RelativeLayout>

@@ -12,6 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
+        android:contentDescription="@string/valid"
         android:src="@drawable/blank" />
 
     <ListView
@@ -32,7 +33,7 @@
         android:layout_alignParentTop="true"
         android:layout_toLeftOf="@+id/imageView"
         android:gravity="center"
-        android:text="Touch to Scan"
+        android:text="@string/scan"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
 </RelativeLayout>

@@ -33,11 +33,11 @@ public class MainActivity extends Activity
 {
   private static final String EOL = "\n";
 
-  private static final String publicPEM = "MFUwEwYHKoZIzj0CAQYIKoZIzj0DAQQDPgAEZFvqdcZ+KiZIxH7/vOruEkK5IP3WwZtoiLL+chQjEzb5nSIjLKKATk2Utz/SpQmS0EvOGTKm/EPCmb6j";
+  private static final String PUBLIC_PEM = "MFUwEwYHKoZIzj0CAQYIKoZIzj0DAQQDPgAEZFvqdcZ+KiZIxH7/vOruEkK5IP3WwZtoiLL+chQjEzb5nSIjLKKATk2Utz/SpQmS0EvOGTKm/EPCmb6j";
 
-  private String T = "HGFA";
+  private static String T = "HGFA";
       
-  private PublicKey publicKey;
+  private static PublicKey publicKey;
   private static SimpleDateFormat dateFormatter;
   private static Date now = new Date();
 
@@ -47,6 +47,18 @@ public class MainActivity extends Activity
         new org.spongycastle.jce.provider.BouncyCastleProvider(), 1);
 
     dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+    
+    try
+    {
+      KeyFactory fact = KeyFactory.getInstance("ECDSA");
+      EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(Base64.decode(
+          PUBLIC_PEM, Base64.DEFAULT));
+      publicKey = fact.generatePublic(publicKeySpec);
+
+    } catch (GeneralSecurityException e)
+    {
+      Log.e(T, e.toString());
+    }
   }
 
   @Override
@@ -55,18 +67,6 @@ public class MainActivity extends Activity
     super.onCreate(savedInstanceState);
 
     setContentView(R.layout.activity_main);
-
-    try
-    {
-      KeyFactory fact = KeyFactory.getInstance("ECDSA");
-      EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(Base64.decode(
-          publicPEM, Base64.DEFAULT));
-      publicKey = fact.generatePublic(publicKeySpec);
-
-    } catch (GeneralSecurityException e)
-    {
-      Log.e(T, e.toString());
-    }
   }
 
   @Override

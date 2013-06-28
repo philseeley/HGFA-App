@@ -1,46 +1,53 @@
 package name.seeley.phil.hgfa;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.StringReader;
-import java.security.InvalidKeyException;
+import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.Security;
 import java.security.Signature;
-import java.security.SignatureException;
 import java.security.spec.EncodedKeySpec;
-import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import android.os.Bundle;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.util.Base64;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+@SuppressLint("SimpleDateFormat")
 public class MainActivity extends Activity
 {
-  static final String EOL = "\n";
+  private static final String EOL = "\n";
 
-  static final String publicPEM = "MFUwEwYHKoZIzj0CAQYIKoZIzj0DAQQDPgAEZFvqdcZ+KiZIxH7/vOruEkK5IP3WwZtoiLL+chQjEzb5nSIjLKKATk2Utz/SpQmS0EvOGTKm/EPCmb6j";
+  private static final String publicPEM = "MFUwEwYHKoZIzj0CAQYIKoZIzj0DAQQDPgAEZFvqdcZ+KiZIxH7/vOruEkK5IP3WwZtoiLL+chQjEzb5nSIjLKKATk2Utz/SpQmS0EvOGTKm/EPCmb6j";
 
   private PublicKey publicKey;
+  private static SimpleDateFormat dateFormatter;
+  private static Date now = new Date();
 
   static
   {
     Security.insertProviderAt(
         new org.spongycastle.jce.provider.BouncyCastleProvider(), 1);
+
+    dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
   }
 
   @Override
   public void onCreate(Bundle savedInstanceState)
   {
     super.onCreate(savedInstanceState);
+
+    setContentView(R.layout.activity_main);
 
     try
     {
@@ -49,17 +56,12 @@ public class MainActivity extends Activity
           publicPEM, Base64.DEFAULT));
       publicKey = fact.generatePublic(publicKeySpec);
 
-    } catch (NoSuchAlgorithmException e)
+    } catch (GeneralSecurityException e)
     {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
-    } catch (InvalidKeySpecException e)
-    {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      TextView infoTextView = (TextView) findViewById(R.id.text_info);
+
+      infoTextView.setText(e.toString());
     }
-    
-    setContentView(R.layout.activity_main);
   }
 
   @Override
@@ -91,51 +93,72 @@ public class MainActivity extends Activity
 
         TextView infoTextView = (TextView) findViewById(R.id.text_info);
         ImageView imageView = (ImageView) findViewById(R.id.imageView);
-        
+
         infoTextView.setText("");
-        
+        imageView.setImageResource(R.drawable.blank);
+
         try
         {
+          int resultID = R.drawable.unknown;
+          boolean expired = true;
+
           String line;
           while ((line = reader.readLine()) != null)
           {
             String elements[] = line.split(":");
-            String tag = elements[0];
-            String value = elements[1];
 
-            if ("_SIG".equals(tag))
-            {
-              Signature instance = Signature.getInstance("ECDSA");
-              instance.initVerify(publicKey);
-              instance.update(data.toString().getBytes());
-              if (instance.verify(Base64.decode(value, Base64.DEFAULT)))
-                imageView.setImageResource(R.drawable.valid);
-              else
-                imageView.setImageResource(R.drawable.invalid);
-            } else
+            if (elements.length < 2)
             {
               data.append(line);
               data.append(EOL);
-              
-              infoTextView.setText(data);
+            }
+            else
+            {
+              String tag = elements[0];
+              String value = elements[1];
+
+              if ("_SIG".equals(tag))
+              {
+                Signature instance = Signature.getInstance("ECDSA");
+                instance.initVerify(publicKey);
+                instance.update(data.toString().getBytes());
+                if (instance.verify(Base64.decode(value, Base64.DEFAULT)))
+                {
+                  if (expired)
+                    resultID = R.drawable.expired;
+                  else
+                    resultID = R.drawable.valid;
+                }
+                else
+                  resultID = R.drawable.invalid;
+              }
+              else
+              {
+                data.append(line);
+                data.append(EOL);
+
+                if ("Expires".equals(tag))
+                {
+                  Date expires = dateFormatter.parse(value);
+
+                  Log.d("t", expires.toString());
+                  if (expires.after(now))
+                    expired = false;
+                }
+                else if (tag.matches("^[0-9]{4}-[0-9]{2}-[0-9]{2}$"))
+                {
+                  Log.d("t", line);
+                }
+              }
             }
           }
-        } catch (IOException e)
+
+          infoTextView.setText(data);
+          imageView.setImageResource(resultID);
+
+        } catch (Exception e)
         {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
-        } catch (NoSuchAlgorithmException e)
-        {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
-        } catch (InvalidKeyException e)
-        {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
-        } catch (SignatureException e)
-        {
-          // TODO Auto-generated catch block
-          e.printStackTrace();
+          infoTextView.setText(e.toString());
         }
       }
     }

@@ -10,7 +10,11 @@ import java.security.Signature;
 import java.security.spec.EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import android.os.Bundle;
 import android.annotation.SuppressLint;
@@ -21,7 +25,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.TextView;
+import android.widget.ListView;
+import android.widget.SimpleAdapter;
 
 @SuppressLint("SimpleDateFormat")
 public class MainActivity extends Activity
@@ -30,6 +35,8 @@ public class MainActivity extends Activity
 
   private static final String publicPEM = "MFUwEwYHKoZIzj0CAQYIKoZIzj0DAQQDPgAEZFvqdcZ+KiZIxH7/vOruEkK5IP3WwZtoiLL+chQjEzb5nSIjLKKATk2Utz/SpQmS0EvOGTKm/EPCmb6j";
 
+  private String T = "HGFA";
+      
   private PublicKey publicKey;
   private static SimpleDateFormat dateFormatter;
   private static Date now = new Date();
@@ -58,9 +65,7 @@ public class MainActivity extends Activity
 
     } catch (GeneralSecurityException e)
     {
-      TextView infoTextView = (TextView) findViewById(R.id.text_info);
-
-      infoTextView.setText(e.toString());
+      Log.e(T, e.toString());
     }
   }
 
@@ -90,17 +95,24 @@ public class MainActivity extends Activity
         BufferedReader reader = new BufferedReader(new StringReader(contents));
 
         StringBuffer data = new StringBuffer();
+        
+        String from[] = {"tag", "value", "icon"};
+        int to[] = {R.id.tag, R.id.value, R.id.icon};
+        
+        List<Map<String, Object>> items = new ArrayList<Map<String, Object>>();
+        
+        SimpleAdapter adapter = new SimpleAdapter(this, items, R.layout.list_view, from, to);
 
-        TextView infoTextView = (TextView) findViewById(R.id.text_info);
+        ListView infoListView = (ListView) findViewById(R.id.listView);
         ImageView imageView = (ImageView) findViewById(R.id.imageView);
 
-        infoTextView.setText("");
+        infoListView.setAdapter(adapter);
         imageView.setImageResource(R.drawable.blank);
 
         try
         {
           int resultID = R.drawable.unknown;
-          boolean expired = true;
+          boolean expired = false;
 
           String line;
           while ((line = reader.readLine()) != null)
@@ -116,7 +128,8 @@ public class MainActivity extends Activity
             {
               String tag = elements[0];
               String value = elements[1];
-
+              int iconID = R.drawable.blank_small;
+              
               if ("_SIG".equals(tag))
               {
                 Signature instance = Signature.getInstance("ECDSA");
@@ -137,28 +150,39 @@ public class MainActivity extends Activity
                 data.append(line);
                 data.append(EOL);
 
-                if ("Expires".equals(tag))
+                if (tag.matches("^[0-9]{4}-[0-9]{2}-[0-9]{2}$"))
                 {
+                  // We check date tags for expiry, but reorder for layout.
+
+                  String tmp = tag;
+                  tag = value;
+                  value = tmp;
                   Date expires = dateFormatter.parse(value);
 
-                  Log.d("t", expires.toString());
-                  if (expires.after(now))
-                    expired = false;
+                  if (expires.before(now))
+                  {
+                    iconID = R.drawable.expired_small;
+                    if ("Expiry".equals(tag))
+                      expired = true;
+                  }
                 }
-                else if (tag.matches("^[0-9]{4}-[0-9]{2}-[0-9]{2}$"))
-                {
-                  Log.d("t", line);
-                }
+                
+                Map<String, Object> map = new HashMap<String, Object>();
+
+                map.put("tag", tag);
+                map.put("value", value);
+                map.put("icon", iconID);
+
+                items.add(map);
               }
             }
           }
 
-          infoTextView.setText(data);
           imageView.setImageResource(resultID);
 
         } catch (Exception e)
         {
-          infoTextView.setText(e.toString());
+          Log.e(T, e.toString());
         }
       }
     }

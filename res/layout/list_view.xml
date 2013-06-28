@@ -13,15 +13,7 @@
         android:layout_weight="0.5"
         android:gravity="left"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:typeface="monospace" />
-
-    <TextView
-        android:id="@+id/value"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="0.5"
-        android:gravity="left"
-        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textStyle="bold"
         android:typeface="monospace" />
 
     <ImageView
@@ -31,5 +23,15 @@
         android:layout_weight="0.9"
         android:contentDescription="@string/expired"
         android:src="@drawable/blank_small" />
+
+    <TextView
+        android:id="@+id/value"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.5"
+        android:gravity="left"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textStyle="bold"
+        android:typeface="monospace" />
 
 </LinearLayout>

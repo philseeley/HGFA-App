@@ -96,15 +96,15 @@ public class MainActivity extends Activity
 
         StringBuffer data = new StringBuffer();
         
-        String from[] = {"tag", "value", "icon"};
-        int to[] = {R.id.tag, R.id.value, R.id.icon};
+        String from[] = {"tag", "icon", "value"};
+        int to[] = {R.id.tag, R.id.icon, R.id.value};
         
         List<Map<String, Object>> items = new ArrayList<Map<String, Object>>();
         
         SimpleAdapter adapter = new SimpleAdapter(this, items, R.layout.list_view, from, to);
 
         ListView infoListView = (ListView) findViewById(R.id.listView);
-        ImageView imageView = (ImageView) findViewById(R.id.imageView);
+        ImageView imageView = (ImageView) findViewById(R.id.image_result);
 
         infoListView.setAdapter(adapter);
         imageView.setImageResource(R.drawable.blank);
@@ -170,8 +170,8 @@ public class MainActivity extends Activity
                 Map<String, Object> map = new HashMap<String, Object>();
 
                 map.put("tag", tag);
-                map.put("value", value);
                 map.put("icon", iconID);
+                map.put("value", value);
 
                 items.add(map);
               }

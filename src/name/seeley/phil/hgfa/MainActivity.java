@@ -46,7 +46,7 @@ public class MainActivity extends Activity
 {
   private static final String EOL = "\n";
 
-  private static final String PUBLIC_PEM = "MFUwEwYHKoZIzj0CAQYIKoZIzj0DAQQDPgAEZFvqdcZ+KiZIxH7/vOruEkK5IP3WwZtoiLL+chQjEzb5nSIjLKKATk2Utz/SpQmS0EvOGTKm/EPCmb6j";
+  private static final String PUBLIC_PEM = "MFUwEwYHKoZIzj0CAQYIKoZIzj0DAQQDPgAEVsDf7iqj5wEzpQYtVwgdICnreYeMATvdEkJbZt0CfD0m3kLCVW3j+nDweVvDE5JB2gBcxCrebf1BdL/D";
 
   private static final String T = "HGFA";
   private static final int SCAN_IMAGE_REQ = 10;
@@ -276,7 +276,9 @@ public class MainActivity extends Activity
       }
       catch (Exception e)
       {
+        infoListView.setAdapter(null);
         infoTextView.setText(e.getMessage());
+        resultImageView.setImageResource(R.drawable.unknown);
       }
     }
   }

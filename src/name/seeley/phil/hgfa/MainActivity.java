@@ -198,6 +198,7 @@ public class MainActivity extends Activity
       BufferedReader reader = new BufferedReader(new StringReader(contents));
 
       StringBuffer data = new StringBuffer();
+      String signatureValue = null;
 
       try
       {
@@ -222,18 +223,7 @@ public class MainActivity extends Activity
 
             if ("_SIG".equals(tag))
             {
-              Signature instance = Signature.getInstance("ECDSA");
-              instance.initVerify(publicKey);
-              instance.update(data.toString().getBytes());
-              if (instance.verify(Base64.decode(value, Base64.DEFAULT)))
-              {
-                if (expired)
-                  resultID = R.drawable.expired;
-                else
-                  resultID = R.drawable.valid;
-              }
-              else
-                resultID = R.drawable.invalid;
+              signatureValue = value;
             }
             else
             {
@@ -268,8 +258,21 @@ public class MainActivity extends Activity
           }
         }
 
-        resultImageView.setImageResource(resultID);
+        Signature instance = Signature.getInstance("ECDSA");
+        instance.initVerify(publicKey);
+        instance.update(data.toString().getBytes());
+        
+        if (instance.verify(Base64.decode(signatureValue, Base64.DEFAULT)))
+        {
+          if (expired)
+            resultID = R.drawable.expired;
+          else
+            resultID = R.drawable.valid;
+        }
+        else
+          resultID = R.drawable.invalid;
 
+        resultImageView.setImageResource(resultID);
       }
       catch (Exception e)
       {

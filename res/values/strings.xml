@@ -7,5 +7,6 @@
     <string name="expired">Expired</string>
     <string name="valid">Valid</string>
     <string name="scan">Tap to Scan</string>
+    <string name="menu_scan_image">Scan Image</string>
     
 </resources>

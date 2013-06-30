@@ -266,11 +266,11 @@ public class MainActivity extends Activity
           }
         }
 
-        Signature instance = Signature.getInstance("ECDSA");
-        instance.initVerify(publicKey);
-        instance.update(data.toString().getBytes());
+        Signature signature = Signature.getInstance("ECDSA");
+        signature.initVerify(publicKey);
+        signature.update(data.toString().getBytes());
 
-        if (instance.verify(Base64.decode(signatureValue, Base64.DEFAULT)))
+        if (signature.verify(Base64.decode(signatureValue, Base64.DEFAULT)))
         {
           if (expired)
             resultID = R.drawable.expired;

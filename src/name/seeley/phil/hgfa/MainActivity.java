@@ -208,28 +208,30 @@ public class MainActivity extends Activity
         String line;
         while ((line = reader.readLine()) != null)
         {
-          String elements[] = line.split(":");
+          int sep = line.indexOf(':');
 
-          if (elements.length < 2)
+          Map<String, Object> map = new HashMap<String, Object>();
+
+          String tag;
+          int iconID = R.drawable.blank_small;
+          String value = "";
+
+          if (sep == -1)
           {
-            data.append(line);
-            data.append(EOL);
+            tag = line;
           }
           else
           {
-            String tag = elements[0];
-            String value = elements[1];
-            int iconID = R.drawable.blank_small;
+            tag = line.substring(0, sep);
+            value = line.substring(sep + 1);
 
             if ("_SIG".equals(tag))
             {
               signatureValue = value;
+              map = null;
             }
             else
             {
-              data.append(line);
-              data.append(EOL);
-
               if (tag.matches("^[0-9]{4}-[0-9]{2}-[0-9]{2}$"))
               {
                 // We check date tags for expiry, but reorder for layout.
@@ -237,31 +239,37 @@ public class MainActivity extends Activity
                 String tmp = tag;
                 tag = value;
                 value = tmp;
+
                 Date expires = dateFormatter.parse(value);
 
                 if (expires.before(now))
                 {
                   iconID = R.drawable.expired_small;
+
                   if ("Expiry".equals(tag))
                     expired = true;
                 }
               }
-
-              Map<String, Object> map = new HashMap<String, Object>();
-
-              map.put("tag", tag);
-              map.put("icon", iconID);
-              map.put("value", value);
-
-              items.add(map);
             }
+          }
+
+          if (map != null)
+          {
+            data.append(line);
+            data.append(EOL);
+            
+            map.put("tag", tag);
+            map.put("icon", iconID);
+            map.put("value", value);
+
+            items.add(map);
           }
         }
 
         Signature instance = Signature.getInstance("ECDSA");
         instance.initVerify(publicKey);
         instance.update(data.toString().getBytes());
-        
+
         if (instance.verify(Base64.decode(signatureValue, Base64.DEFAULT)))
         {
           if (expired)
